@@ -1,0 +1,32 @@
+{
+  "name": "sslexpiry",
+  "version": "1.0.0",
+  "description": "Keep an eye on the expiry dates of SSL certificates",
+  "keywords": [
+    "ssl-certificate-check",
+    "ssl-certificate-manager",
+    "ssl-certificates"
+  ],
+  "main": "index.js",
+  "bin": "./cli.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jribbens/sslexpiry.js.git"
+  },
+  "author": "Jon Ribbens <jribbens@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jribbens/sslexpiry.js/issues"
+  },
+  "homepage": "https://github.com/jribbens/sslexpiry.js#readme",
+  "engines": {
+    "node": "8"
+  },
+  "dependencies": {
+    "awaitify-stream": "^1.0.1",
+    "byline": "^5.0.0",
+    "chalk": "^2.3.2",
+    "commander": "^2.14.1",
+    "strftime": "^0.10.0"
+  }
+}
