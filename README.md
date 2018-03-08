@@ -9,6 +9,7 @@ SSL certificates, and checks the expiry dates etc. It will warn you if:
   * the SSL certificate does not verify,
   * the SSL certificate does not match the server hostname,
   * the server does not support SSL,
+  * the certificate uses MD5 or SHA1,
   * the certificate has expired,
   * the certificate was issued on 1st March 2018 or later
     and is valid for over [825 days](https://cabforum.org/2017/03/17/ballot-193-825-day-certificate-lifetimes/),
@@ -24,7 +25,7 @@ you if your certificates will expire soon.
 Requirements
 ------------
 
-The script relies node 8 (it has been tested under node 8.9.4).
+The script relies on node 8 (it has been tested under node 8.9.4).
 You can install it with:
 
     sudo npm install -g sslexpiry
@@ -85,7 +86,15 @@ Example output
 --------------
 
     $ sslexpiry -vf example.conf
-    www.example.com                 Certificate expiry date is 13 Mar 2018 - 6 days
     example.com                     Hostname/IP doesn't match certificate's altnames
+    www.example.com                 Certificate expiry date is 13 Mar 2018 - 6 days
     othermail.example.com:2525/smtp 03 Jul 2018
     mail.example.com:smtp           10 Oct 2018
+
+
+History
+-------
+
+### 1.0.0 (2018-03-08)
+
+    - Initial release.
