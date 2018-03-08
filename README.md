@@ -95,6 +95,10 @@ Example output
 History
 -------
 
-### 1.0.0 (2018-03-08)
+### 1.1.0 (2018-03-08)
+
+    - Check certificate is not using MD5 or SHA1
+
+### 1.0.0 (2018-03-07)
 
     - Initial release.
