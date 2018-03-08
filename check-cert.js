@@ -1,3 +1,4 @@
+const { asn1, pki, util: { ByteBuffer } } = require('node-forge')
 const strftime = require('strftime')
 
 class CertError extends Error {
@@ -22,6 +23,16 @@ module.exports.checkCert = (certificate, days) => {
     throw new CertError(
       `Certificate expired on ${strftime('%d %b %Y', validTo)}!`,
       true, validTo)
+  }
+
+  const forgeCert = pki.certificateFromAsn1(
+    asn1.fromDer(new ByteBuffer(certificate.raw)))
+  const sigAlg = pki.oids[forgeCert.siginfo.algorithmOid]
+  if (!sigAlg) {
+    throw new CertError('Signature algorithm is unknown', false, validTo)
+  }
+  if (/md5|sha1\b/i.test(sigAlg)) {
+    throw new CertError(`Signature algorithm is ${sigAlg}`)
   }
 
   if (/symantec|thawte|rapidssl|geotrust/i.test(certificate.issuer.CN)) {
