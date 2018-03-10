@@ -1,3 +1,5 @@
+'use strict'
+
 const { asn1, pki, util: { ByteBuffer } } = require('node-forge')
 const strftime = require('strftime')
 

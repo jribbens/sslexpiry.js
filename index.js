@@ -1,3 +1,5 @@
+'use strict'
+
 const { CertError, checkCert } = require('./check-cert')
 const { connect } = require('./connect')
 const { version } = require('./package')

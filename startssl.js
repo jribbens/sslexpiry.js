@@ -1,3 +1,5 @@
+'use strict'
+
 const { createReader, createWriter } = require('awaitify-stream')
 const byline = require('byline')
 
