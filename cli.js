@@ -24,7 +24,7 @@ const sslexpiry = async () => {
   parser.addArgument(['-d', '--days'], {
     defaultValue: 30,
     type: 'int',
-    help: 'The number of days at which to warn of expiry'
+    help: 'The number of days at which to warn of expiry (default=30)'
   })
   parser.addArgument(['-f', '--from-file'], {
     action: 'append',
@@ -36,7 +36,7 @@ const sslexpiry = async () => {
     defaultValue: 30,
     type: 'int',
     metavar: 'SECONDS',
-    help: 'The number of seconds to allow for server response'
+    help: 'The number of seconds to allow for server response (default=30)'
   })
   parser.addArgument(['-v', '--verbose'], {
     action: 'count',
