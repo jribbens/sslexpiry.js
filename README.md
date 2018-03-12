@@ -95,6 +95,10 @@ Example output
 History
 -------
 
+### 1.2.0 (2018-03-12)
+
+    - Fix argument parsing by replacing commander with argparse
+
 ### 1.1.0 (2018-03-08)
 
     - Check certificate is not using MD5 or SHA1
