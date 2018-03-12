@@ -27,6 +27,8 @@ const sslexpiry = async () => {
     .option('-v, --verbose', 'Display verbose output')
     .parse(process.argv)
 
+  console.log(`days=${program.days}  timeout=${program.timeout}`)
+
   const servers = program.args.slice()
   const results = {}
 

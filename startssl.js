@@ -1,9 +1,17 @@
 'use strict'
 
+/** startssl module to perform a STARTSSL-type procedure on a stream
+  * @module startssl
+  */
+
 const { createReader, createWriter } = require('awaitify-stream')
 const byline = require('byline')
 
+/* STARTSSL null procedure */
+
 const none = (readSocket, writeSocket) => {}
+
+/* STARTSSL SMTP procedure */
 
 const smtp = async (readSocket, writeSocket) => {
   var found
@@ -33,6 +41,8 @@ const smtp = async (readSocket, writeSocket) => {
   }
 }
 
+/* STARTSSL IMAP procedure */
+
 const imap = async (readSocket, writeSocket) => {
   var line
 
@@ -59,6 +69,17 @@ const imap = async (readSocket, writeSocket) => {
   }
 }
 
+/** Perform a STARTSSL-type procedure on a stream. The stream will be set
+  * to 'binary' encoding.
+  *
+  * @async
+  * @param {stream.Duplex} socket - The stream to use.
+  * @param {string} [protocol='none'] - The protocol to use:
+  *   'none', 'smtp' or 'imap'.
+  * @throws {Error} If the protocol is unknown, or the server the stream
+  *   is connected to does not respond as expected, or does not appear to
+  *   support TLS.
+  */
 module.exports.startssl = async (socket, protocol) => {
   socket.setEncoding('binary')
   const readSocket = createReader(byline(socket))

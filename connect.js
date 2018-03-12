@@ -1,5 +1,11 @@
 'use strict'
 
+/**
+  * Connect module. Provides a function to fetch a TLS certificate from
+  * a network server.
+  * @module connect
+  */
+
 const net = require('net')
 const tls = require('tls')
 const { startssl } = require('./startssl')
@@ -18,6 +24,19 @@ const getPort = (port) => {
     submission: { port: 587, protocol: 'smtp' }
   }[port]
 }
+
+/**
+  * Connect to a network service, optionally perform some sort of STARTSSL
+  * procedure, then negotiate TLS and return the server's certificate.
+  *
+  * @async
+  * @param {string} servername - The DNS name to connect to.
+  * @param {(string|integer)} [port=443] - The TCP port to connect to.
+  * @param {string} [protocol] - The STARTTLS protocol to use. Defaults to
+  *   'none', except if <port> is 'smtp', 'submission' or 'imap'.
+  * @param {integer} [timeout] - The number of milliseconds to wait.
+  * @returns {certificate} The server's certificate.
+  */
 
 module.exports.connect = async (servername, port, protocol, timeout) => {
   const portInfo = getPort(port)
