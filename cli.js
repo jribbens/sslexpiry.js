@@ -3,10 +3,10 @@
 
 const fs = require('fs')
 
+const { ArgumentParser, Const: { SUPPRESS } } = require('argparse')
 const { createReader } = require('awaitify-stream')
 const byline = require('byline')
 const chalk = require('chalk')
-const program = require('commander')
 const strftime = require('strftime')
 
 const { CertError, checkCert } = require('./check-cert')
@@ -14,27 +14,47 @@ const { connect } = require('./connect')
 const { version } = require('./package')
 
 const sslexpiry = async () => {
-  program
-    .version(version)
-    .description('SSL expiry checker')
-    .option('-d, --days [days]',
-            'The number of days at which to warn of expiry', parseInt, 30)
-    .option('-f, --from-file [filename]',
-            'Read the servers to check from the specified file')
-    .option('-t, --timeout [seconds]',
-            'The number of seconds to allow for server response',
-            parseInt, 30)
-    .option('-v, --verbose', 'Display verbose output')
-    .parse(process.argv)
+  const parser = new ArgumentParser({
+    description: 'SSL expiry checker'
+  })
+  parser.addArgument('servers', {
+    nargs: '*',
+    help: 'The servers to check'
+  })
+  parser.addArgument(['-d', '--days'], {
+    defaultValue: 30,
+    type: 'int',
+    help: 'The number of days at which to warn of expiry'
+  })
+  parser.addArgument(['-f', '--from-file'], {
+    action: 'append',
+    defaultValue: [],
+    metavar: 'FILENAME',
+    help: 'Read the servers to check from the specified file'
+  })
+  parser.addArgument(['-t', '--timeout'], {
+    defaultValue: 30,
+    type: 'int',
+    metavar: 'SECONDS',
+    help: 'The number of seconds to allow for server response'
+  })
+  parser.addArgument(['-v', '--verbose'], {
+    action: 'count',
+    help: 'Display verbose output'
+  })
+  parser.addArgument(['-V', '--version'], {
+    action: 'version',
+    version,
+    defaultValue: SUPPRESS,
+    help: 'Show program\'s version number and exit.'
+  })
 
-  console.log(`days=${program.days}  timeout=${program.timeout}`)
-
-  const servers = program.args.slice()
+  const args = parser.parseArgs()
+  const servers = args.servers.slice()
   const results = {}
 
-  if (program.fromFile) {
-    const serverFile = fs.createReadStream(program.fromFile)
-    serverFile.setEncoding('utf8')
+  for (let filename of args.from_file) {
+    const serverFile = fs.createReadStream(filename, 'utf8')
     const lineStream = createReader(byline(serverFile))
     let line
     do {
@@ -53,9 +73,9 @@ const sslexpiry = async () => {
     promises.push((async () => {
       try {
         const certificate = await connect(
-          servername, port, protocol, program.timeout * 1000)
-        results[server] = checkCert(certificate, program.days)
-        if (program.verbose) {
+          servername, port, protocol, args.timeout * 1000)
+        results[server] = checkCert(certificate, args.days)
+        if (args.verbose) {
           if (server.length > longest) longest = server.length
         }
       } catch (e) {
@@ -86,7 +106,7 @@ const sslexpiry = async () => {
   for (let server of servers) {
     let result = results[server]
     if (result instanceof Date) {
-      if (program.verbose) {
+      if (args.verbose) {
         console.log(
           server.padEnd(longest),
           strftime('%d %b %Y', result))
