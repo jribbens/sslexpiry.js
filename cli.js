@@ -18,29 +18,30 @@ const sslexpiry = async () => {
     description: 'SSL expiry checker'
   })
   parser.addArgument('servers', {
+    metavar: 'SERVER',
     nargs: '*',
-    help: 'The servers to check'
+    help: 'Check the specified server.'
   })
   parser.addArgument(['-d', '--days'], {
     defaultValue: 30,
     type: 'int',
-    help: 'The number of days at which to warn of expiry (default=30)'
+    help: 'The number of days at which to warn of expiry. (default=30)'
   })
   parser.addArgument(['-f', '--from-file'], {
     action: 'append',
     defaultValue: [],
     metavar: 'FILENAME',
-    help: 'Read the servers to check from the specified file'
+    help: 'Read the servers to check from the specified file.'
   })
   parser.addArgument(['-t', '--timeout'], {
     defaultValue: 30,
     type: 'int',
     metavar: 'SECONDS',
-    help: 'The number of seconds to allow for server response (default=30)'
+    help: 'The number of seconds to allow for server response. (default=30)'
   })
   parser.addArgument(['-v', '--verbose'], {
     action: 'count',
-    help: 'Display verbose output'
+    help: 'Display verbose output.'
   })
   parser.addArgument(['-V', '--version'], {
     action: 'version',

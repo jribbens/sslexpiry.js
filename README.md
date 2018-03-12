@@ -34,19 +34,26 @@ You can install it with:
 Usage
 -----
 
-    Usage: sslexpiry [options]
-  
+    usage: sslexpiry [-h] [-d DAYS] [-f FILENAME] [-t SECONDS] [-v] [-V]
+                     [SERVER [SERVER ...]]
+
     SSL expiry checker
-  
-  
-    Options:
-  
-      -V, --version               output the version number
-      -d, --days [days]           The number of days at which to warn of expiry (default: 30)
-      -f, --from-file [filename]  Read the servers to check from the specified file
-      -t, --timeout [seconds]     The number of seconds to allow for server response (default: 30)
-      -v, --verbose               Display verbose output
-      -h, --help                  output usage information
+
+    Positional arguments:
+      SERVER                Check the specified server.
+
+    Optional arguments:
+      -h, --help            Show this help message and exit.
+      -d DAYS, --days DAYS  The number of days at which to warn of expiry.
+                            (default=30)
+      -f FILENAME, --from-file FILENAME
+                            Read the servers to check from the specified file.
+      -t SECONDS, --timeout SECONDS
+                            The number of seconds to allow for server response.
+                            (default=30)
+      -v, --verbose         Display verbose output.
+      -V, --version         Show program's version number and exit.
+
 
 Files containing lists of servers can contain blank lines, and any
 characters from a '#' onwards are ignored as comments.
