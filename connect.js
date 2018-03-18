@@ -35,10 +35,11 @@ const getPort = (port) => {
   * @param {string} [protocol] - The STARTTLS protocol to use. Defaults to
   *   'none', except if <port> is 'smtp', 'submission' or 'imap'.
   * @param {integer} [timeout] - The number of milliseconds to wait.
+  * @param {object} [ca] - secureContext 'ca' parameter.
   * @returns {certificate} The server's certificate.
   */
 
-module.exports.connect = async (servername, port, protocol, timeout) => {
+module.exports.connect = (servername, port, protocol, timeout, ca) => {
   const portInfo = getPort(port)
   if (!portInfo) throw new Error(`Unknown port ${port}`)
   if (!protocol && portInfo.protocol) protocol = portInfo.protocol
@@ -53,7 +54,7 @@ module.exports.connect = async (servername, port, protocol, timeout) => {
           socket.destroy()
           return
         }
-        var tlsSocket = tls.connect({socket, servername}, () => {
+        var tlsSocket = tls.connect({ca, servername, socket}, () => {
           if (!tlsSocket.authorized) {
             reject(new Error(tlsSocket.authorizationError))
           } else {

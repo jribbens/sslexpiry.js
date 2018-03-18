@@ -26,7 +26,7 @@ const CertError = module.exports.CertError = class extends Error {
     */
   constructor (message, severe, endDate) {
     super(message)
-    this.severe = severe || false
+    this.severe = !!severe
     this.endDate = endDate
   }
 }
@@ -36,16 +36,17 @@ const CertError = module.exports.CertError = class extends Error {
   *
   * @param {certificate} certificate - The certificate to check.
   * @param {integer} days - The number of days to consider 'soon'.
+  * @param {Date} [now] - When to consider 'now' to be.
   * @returns {Date} - the date the certificate will fail.
   * @throws {CertError} There was a problem with a certificate.
   */
-module.exports.checkCert = (certificate, days) => {
-  const now = new Date()
+module.exports.checkCert = (certificate, days, now) => {
   const validFrom = new Date(certificate.valid_from)
   const validTo = new Date(certificate.valid_to)
   const lifetimeDays = Math.floor((validTo - validFrom) / 86400000)
   var endDate = validTo
   var endReason = 'expiry'
+  now = now || new Date()
 
   /* Check if the certificate has already expired. */
 
@@ -64,8 +65,8 @@ module.exports.checkCert = (certificate, days) => {
   if (!sigAlg) {
     throw new CertError('Signature algorithm is unknown', false, validTo)
   }
-  if (/md5|sha1\b/i.test(sigAlg)) {
-    throw new CertError(`Signature algorithm is ${sigAlg}`)
+  if (/md5|sha1(?!\d)/i.test(sigAlg)) {
+    throw new CertError(`Signature algorithm is ${sigAlg}`, true, validTo)
   }
 
   /* Check if the certificate is issued by one of the Symantec CAs
@@ -79,6 +80,14 @@ module.exports.checkCert = (certificate, days) => {
       endDate = distrustDate
       endReason = 'distrust'
     }
+  }
+
+  /* Check if the certificate has already become distrusted. */
+
+  if (endDate.getTime() <= now.getTime()) {
+    throw new CertError(
+      `Certificate became distrusted on ${strftime('%d %b %Y', endDate)}!`,
+      true, endDate)
   }
 
   /* Check if the certificate will expire or become distrusted soon. */
@@ -96,7 +105,7 @@ module.exports.checkCert = (certificate, days) => {
   if (validFrom.getTime() >= new Date('2018-03-01').getTime() &&
       lifetimeDays > 825) {
     throw new CertError(
-      `Certificate lifetime of ${lifetimeDays} is too long`, true)
+      `Certificate lifetime of ${lifetimeDays} is too long`, true, endDate)
   }
 
   /* No problems found - return the certificate failure date. */
