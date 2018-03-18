@@ -102,6 +102,11 @@ Example output
 History
 -------
 
+### 1.3.0 (2018-03-18)
+
+    - Add tests and Travis integration
+    - Miscellaneous fixes found by the tests
+
 ### 1.2.0 (2018-03-12)
 
     - Fix argument parsing by replacing commander with argparse
