@@ -103,24 +103,25 @@ History
 
 ### 1.4.0 (2018-03-20)
 
-    - Add more tests
-    - Improve sorting order of output
-    - Update package to say it works on Node 7
-    - Ignore '!' prefix on server names for compatibility with [Python sslexpiry](https://github.com/jribbens/sslexpiry)
+  * Add more tests
+  * Improve sorting order of output
+  * Update package to say it works on Node 7
+  * Ignore '!' prefix on server names for compatibility with
+    [Python sslexpiry](https://github.com/jribbens/sslexpiry)
 
 ### 1.3.0 (2018-03-18)
 
-    - Add tests and Travis integration
-    - Miscellaneous fixes found by the tests
+  * Add tests and Travis integration
+  * Miscellaneous fixes found by the tests
 
 ### 1.2.0 (2018-03-12)
 
-    - Fix argument parsing by replacing commander with argparse
+  * Fix argument parsing by replacing commander with argparse
 
 ### 1.1.0 (2018-03-08)
 
-    - Check certificate is not using MD5 or SHA1
+  * Check certificate is not using MD5 or SHA1
 
 ### 1.0.0 (2018-03-07)
 
-    - Initial release.
+  * Initial release.
