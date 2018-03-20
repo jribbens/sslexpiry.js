@@ -12,6 +12,11 @@ const strftime = require('strftime')
 const { CertError } = require('./check-cert')
 const { version } = require('./package')
 
+const padEnd = (string, targetLength) => {
+  while (string.length < targetLength) string += ' '
+  return string
+}
+
 const sslexpiry = async (argv, {
   debug = false, checkCert, connect, output = console.log } = {}) => {
   checkCert = checkCert || require('./check-cert').checkCert
@@ -131,15 +136,15 @@ const sslexpiry = async (argv, {
     let result = results[server]
     if (result instanceof Date) {
       if (args.verbose) {
-        output(server.padEnd(longest) + ' ' + strftime('%d %b %Y', result))
+        output(padEnd(server, longest) + ' ' + strftime('%d %b %Y', result))
       }
     } else {
       if (result instanceof CertError && !result.severe) {
-        output(chalk.yellow(server.padEnd(longest) + ' ' + result.message))
+        output(chalk.yellow(padEnd(server, longest) + ' ' + result.message))
       } else if (result instanceof Error) {
-        output(chalk.red(server.padEnd(longest) + ' ' + result.message))
+        output(chalk.red(padEnd(server, longest) + ' ' + result.message))
       } else {
-        output(server.padEnd(longest) + ' ' + result)
+        output(padEnd(server, longest) + ' ' + result)
       }
     }
   }
