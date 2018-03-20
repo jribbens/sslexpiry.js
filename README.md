@@ -25,8 +25,7 @@ you if your certificates will expire soon.
 Requirements
 ------------
 
-The script relies on node 8 (it has been tested under node 8.9.4).
-You can install it with:
+The script relies on Node.js 7 or above. You can install it with:
 
     sudo npm install -g sslexpiry
 
@@ -101,6 +100,13 @@ Example output
 
 History
 -------
+
+### 1.4.0 (2018-03-20)
+
+    - Add more tests
+    - Improve sorting order of output
+    - Update package to say it works on Node 7
+    - Ignore '!' prefix on server names for compatibility with [Python sslexpiry](https://github.com/jribbens/sslexpiry)
 
 ### 1.3.0 (2018-03-18)
 
