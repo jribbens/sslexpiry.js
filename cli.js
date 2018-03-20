@@ -82,6 +82,7 @@ const sslexpiry = async (argv, {
     let servername, protocol, port
     ;[ servername, protocol ] = server.split('/', 2)
     ;[ servername, port ] = servername.split(':', 2)
+    if (servername.charAt(0) === '!') servername = servername.substr(1)
     promises.push((async () => {
       try {
         const certificate = await connect(

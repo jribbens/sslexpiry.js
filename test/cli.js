@@ -142,6 +142,13 @@ describe('cli.js', function () {
     ])
   })
 
+  it('should ignore \'!\' prefixed to server name', async function () {
+    await sslexpiry('!server1')
+    expect(connects).to.deep.equal([
+      'server1,undefined,undefined,30000'
+    ])
+  })
+
   it('should do nothing when no issues', async function () {
     await sslexpiry('server1')
     expect(result).to.equal('')
