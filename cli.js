@@ -9,14 +9,25 @@ const byline = require('byline')
 const chalk = require('chalk')
 const strftime = require('strftime')
 
-const { CertError, checkCert } = require('./check-cert')
-const { connect } = require('./connect')
+const { CertError } = require('./check-cert')
 const { version } = require('./package')
 
-const sslexpiry = async () => {
+const sslexpiry = async (argv, {
+  debug = false, checkCert, connect, output = console.log } = {}) => {
+  checkCert = checkCert || require('./check-cert').checkCert
+  connect = connect || require('./connect').connect
+
   const parser = new ArgumentParser({
-    description: 'SSL expiry checker'
+    debug,
+    description: 'SSL expiry checker',
+    prog: 'sslexpiry'
   })
+  if (debug) {
+    parser.exit = function (status, message) { this._printMessage(message) }
+    if (output) {
+      parser._printMessage = (message) => { message && output('' + message) }
+    }
+  }
   parser.addArgument('servers', {
     metavar: 'SERVER',
     nargs: '*',
@@ -50,7 +61,7 @@ const sslexpiry = async () => {
     help: 'Show program\'s version number and exit.'
   })
 
-  const args = parser.parseArgs()
+  const args = parser.parseArgs(argv)
   const servers = args.servers.slice()
   const results = {}
 
@@ -92,12 +103,23 @@ const sslexpiry = async () => {
     const a = results[keyA]
     const b = results[keyB]
     if (a instanceof Date) {
-      if (b instanceof Date) return a - b
+      if (b instanceof Date) {
+        if (a - b) return a - b
+        return keyA < keyB ? -1 : 1
+      }
       return 1
     }
     if (b instanceof Date) return -1
+    if (a instanceof CertError && b instanceof CertError &&
+        a.severe !== b.severe) {
+      if (a.severe) return -1
+      return 1
+    }
     if (a instanceof CertError && a.endDate) {
-      if (b instanceof CertError && b.endDate) return a.endDate - b.endDate
+      if (b instanceof CertError && b.endDate) {
+        if (a.endDate - b.endDate) return a.endDate - b.endDate
+        return keyA < keyB ? -1 : 1
+      }
       return 1
     }
     if (b instanceof CertError && b.endDate) return -1
@@ -108,27 +130,29 @@ const sslexpiry = async () => {
     let result = results[server]
     if (result instanceof Date) {
       if (args.verbose) {
-        console.log(
-          server.padEnd(longest),
-          strftime('%d %b %Y', result))
+        output(server.padEnd(longest) + ' ' + strftime('%d %b %Y', result))
       }
     } else {
       if (result instanceof CertError && !result.severe) {
-        console.log(chalk.yellow(server.padEnd(longest), result.message))
+        output(chalk.yellow(server.padEnd(longest) + ' ' + result.message))
       } else if (result instanceof Error) {
-        console.log(chalk.red(server.padEnd(longest), result.message))
+        output(chalk.red(server.padEnd(longest) + ' ' + result.message))
       } else {
-        console.log(server.padEnd(longest), result)
+        output(server.padEnd(longest) + ' ' + result)
       }
     }
   }
 }
 
-;(async () => {
-  try {
-    await sslexpiry()
-  } catch (e) {
-    console.log(e)
-    process.exitCode = 1
-  }
-})()
+module.exports.sslexpiry = sslexpiry
+
+if (require.main === module) {
+  ;(async () => {
+    try {
+      await sslexpiry()
+    } catch (e) {
+      console.log(e)
+      process.exitCode = 1
+    }
+  })()
+}

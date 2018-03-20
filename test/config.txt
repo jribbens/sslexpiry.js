@@ -1,0 +1,8 @@
+
+# comment alone on a line
+
+server1 # comment on a line with a server
+  server2:port
+	server1/protocol # tab
+    # server2
+server1:port/protocol

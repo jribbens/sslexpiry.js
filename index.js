@@ -9,4 +9,4 @@ module.exports.checkCert = checkCert
 module.exports.connect = connect
 module.exports.version = version
 
-if (require.main === module) require('./cli.js')
+if (require.main === module) require('./cli.js').sslexpiry()
