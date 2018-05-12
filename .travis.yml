@@ -4,4 +4,6 @@ node_js:
   - '8'
   - '9'
   - 'node'
-before_install: npm audit
+before_install:
+  - npm install -g npm
+  - npm audit
