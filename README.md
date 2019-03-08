@@ -52,6 +52,7 @@ Usage
                             (default=30)
       -v, --verbose         Display verbose output.
       -V, --version         Show program's version number and exit.
+      -z, --exit-zero       Always return a process exit code of zero.
 
 
 Files containing lists of servers can contain blank lines, and any
