@@ -103,6 +103,10 @@ Example output
 History
 -------
 
+### 1.5.0 (2019-03-08)
+
+  * Add '--exit-zero' option
+
 ### 1.4.0 (2018-03-20)
 
   * Add more tests
