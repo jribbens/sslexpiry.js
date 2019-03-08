@@ -65,6 +65,10 @@ const sslexpiry = async (argv, {
     defaultValue: SUPPRESS,
     help: 'Show program\'s version number and exit.'
   })
+  parser.addArgument(['-z', '--exit-zero'], {
+    action: 'storeTrue',
+    help: 'Always return a process exit code of zero.'
+  })
 
   const args = parser.parseArgs(argv)
   const servers = args.servers.slice()
@@ -98,7 +102,7 @@ const sslexpiry = async (argv, {
         }
       } catch (e) {
         results[server] = e
-        process.exitCode = 74
+        if (!args.exit_zero) process.exitCode = 74
         if (server.length > longest) longest = server.length
       }
     })())

@@ -74,7 +74,9 @@ If the `-v` option is specified, then output will be shown with any problems
 found first, then all tested servers listed with soonest expiry date first.
 
 The process exit code will be zero if no problems were found, and
-non-zero otherwise.
+non-zero otherwise, unless the `--exit-zero` option was specified,
+in which case the exit code will be zero unless there was an
+unexpected error.
 
 
 Example server list file

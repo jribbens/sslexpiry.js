@@ -48,6 +48,7 @@ describe('cli.js', function () {
     checkDays = undefined
     connects.length = 0
     result = ''
+    process.exitCode = 0
     return cli.sslexpiry(argv, {
       checkCert,
       connect,
@@ -158,6 +159,11 @@ describe('cli.js', function () {
   it('should set exit code when issues found', async function () {
     await sslexpiry('expired')
     expect(process.exitCode).to.equal(74)
+  })
+
+  it('should not set exit code with --exit-zero', async function () {
+    await sslexpiry('--exit-zero', 'expired')
+    expect(process.exitCode).to.equal(0)
   })
 
   it('should output messages when issues found', async function () {
