@@ -145,6 +145,7 @@ describe('check-cert.js', function () {
         notBefore: new Date('2017-03-01'),
         notAfter: new Date('2019-06-05')
       })
+      now = new Date('2018-10-01')
       expect(callCheckCert()).to.be.an.instanceof(Date)
         .sameMoment(cert.validity.notAfter)
     })
@@ -154,6 +155,7 @@ describe('check-cert.js', function () {
         notBefore: new Date('2018-03-01'),
         notAfter: new Date('2020-06-04')
       })
+      now = new Date('2018-10-01')
       expect(callCheckCert).to.throw(CertError, /too long/i)
         .to.include({severe: true})
         .with.property('endDate').sameMoment(cert.validity.notAfter)

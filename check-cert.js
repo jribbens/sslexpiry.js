@@ -75,7 +75,7 @@ module.exports.checkCert = (certificate, days, now) => {
   if (/symantec|thawte|rapidssl|geotrust/i.test(certificate.issuer.CN)) {
     const distrustDate = new Date(
       validFrom.getTime() < new Date('2016-06-01').getTime()
-      ? '2018-03-15' : '2018-09-13')
+        ? '2018-03-15' : '2018-09-13')
     if (distrustDate.getTime() < validTo.getTime()) {
       endDate = distrustDate
       endReason = 'distrust'
