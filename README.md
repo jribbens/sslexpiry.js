@@ -115,6 +115,10 @@ Example output
 History
 -------
 
+### 1.6.0 (2020-03-04)
+
+  * Add '--bad-serials' option
+
 ### 1.5.0 (2019-03-08)
 
   * Add '--exit-zero' option
