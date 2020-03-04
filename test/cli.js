@@ -30,7 +30,7 @@ describe('cli.js', function () {
       'error': new Error('error'),
       'expired': new CertError('expired', true, new Date(+now - 7 * DAYS)),
       'expiring': new CertError('expiring', false, new Date(+now + 7 * DAYS))
-    }[certificate.split(',', 1)[0]] || date
+    }[certificate._name.split(',', 1)[0]] || date
     checkDays = days
     if (response instanceof Error) throw response
     return response
@@ -39,7 +39,7 @@ describe('cli.js', function () {
   function connect (servername, port, protocol, timeout) {
     const name = '' + servername + ',' + port + ',' + protocol + ',' + timeout
     connects.push(name)
-    return name
+    return { _name: name, serialNumber: '01deadBEEF01' }
   }
 
   function output (message) { result += message.trimRight() + '\n' }
@@ -255,5 +255,12 @@ describe('cli.js', function () {
       'server1,undefined,protocol,30000',
       'server1,port,protocol,30000'
     ])
+  })
+
+  it('should check bad-serials files', async function () {
+    await sslexpiry(
+      '-b', path.join(__dirname, 'bad-serials.txt'),
+      'server1')
+    expect(result).to.equal('server1 Serial number is on the bad list\n')
   })
 })

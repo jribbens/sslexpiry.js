@@ -1,0 +1,4 @@
+# test bad-serials file
+
+  01DEADbeef01  
+

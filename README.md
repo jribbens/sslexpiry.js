@@ -33,7 +33,9 @@ The script relies on Node.js 7 or above. You can install it with:
 Usage
 -----
 
-    usage: sslexpiry [-h] [-d DAYS] [-f FILENAME] [-t SECONDS] [-v] [-V]
+
+    usage: sslexpiry [-h] [-b FILENAME] [-d DAYS] [-f FILENAME] [-t SECONDS]
+                     [-v] [-V] [-z]
                      [SERVER [SERVER ...]]
 
     SSL expiry checker
@@ -43,6 +45,9 @@ Usage
 
     Optional arguments:
       -h, --help            Show this help message and exit.
+      -b FILENAME, --bad-serials FILENAME
+                            Check the certificate serial numbers against the
+                            specified file.
       -d DAYS, --days DAYS  The number of days at which to warn of expiry.
                             (default=30)
       -f FILENAME, --from-file FILENAME
@@ -73,6 +78,12 @@ assumed.
 
 If the `-v` option is specified, then output will be shown with any problems
 found first, then all tested servers listed with soonest expiry date first.
+
+If the `-b` option is specified, the serial numbers of the certificates
+will be checked against those listed in the specified file(s). The file(s)
+should contain one serial number per line. They can contain blank lines,
+and any characters from a '#' onwards are ignored, as are leading or trailing
+whitespace. The serial numbers can be in either upper or lower case.
 
 The process exit code will be zero if no problems were found, and
 non-zero otherwise, unless the `--exit-zero` option was specified,

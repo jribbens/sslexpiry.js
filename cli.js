@@ -38,6 +38,12 @@ const sslexpiry = async (argv, {
     nargs: '*',
     help: 'Check the specified server.'
   })
+  parser.addArgument(['-b', '--bad-serials'], {
+    action: 'append',
+    defaultValue: [],
+    metavar: 'FILENAME',
+    help: 'Check the certificate serial numbers against the specified file.'
+  })
   parser.addArgument(['-d', '--days'], {
     defaultValue: 30,
     type: 'int',
@@ -72,7 +78,9 @@ const sslexpiry = async (argv, {
 
   const args = parser.parseArgs(argv)
   const servers = args.servers.slice()
+  const badSerials = {}
   const results = {}
+  const serials = {}
 
   for (let filename of args.from_file) {
     const serverFile = fs.createReadStream(filename, 'utf8')
@@ -82,6 +90,17 @@ const sslexpiry = async (argv, {
       line = await lineStream.readAsync()
       if (line) line = line.split('#', 1)[0].trim()
       if (line) servers.push(line)
+    } while (line !== null)
+  }
+
+  for (let filename of args.bad_serials) {
+    const serialFile = fs.createReadStream(filename, 'utf8')
+    const lineStream = createReader(byline(serialFile))
+    let line
+    do {
+      line = await lineStream.readAsync()
+      if (line) line = line.split('#', 1)[0].trim()
+      if (line) badSerials[line.toLowerCase()] = true
     } while (line !== null)
   }
 
@@ -96,7 +115,12 @@ const sslexpiry = async (argv, {
       try {
         const certificate = await connect(
           servername, port, protocol, args.timeout * 1000)
-        results[server] = checkCert(certificate, args.days)
+        serials[server] = certificate.serialNumber
+        if (badSerials[certificate.serialNumber.toLowerCase()]) {
+          throw new CertError(`Serial number is on the bad list`, true)
+        } else {
+          results[server] = checkCert(certificate, args.days)
+        }
         if (args.verbose) {
           if (server.length > longest) longest = server.length
         }
@@ -138,17 +162,21 @@ const sslexpiry = async (argv, {
 
   for (let server of servers) {
     let result = results[server]
+    let serial = (args.verbose > 1) ? (' ' + padEnd(serials[server], 36)) : ''
     if (result instanceof Date) {
       if (args.verbose) {
-        output(padEnd(server, longest) + ' ' + strftime('%d %b %Y', result))
+        output(padEnd(server, longest) + serial + ' ' +
+               strftime('%d %b %Y', result))
       }
     } else {
       if (result instanceof CertError && !result.severe) {
-        output(chalk.yellow(padEnd(server, longest) + ' ' + result.message))
+        output(chalk.yellow(padEnd(server, longest) + serial + ' ' +
+               result.message))
       } else if (result instanceof Error) {
-        output(chalk.red(padEnd(server, longest) + ' ' + result.message))
+        output(chalk.red(padEnd(server, longest) + serial + ' ' +
+               result.message))
       } else {
-        output(padEnd(server, longest) + ' ' + result)
+        output(padEnd(server, longest) + serial + ' ' + result)
       }
     }
   }
