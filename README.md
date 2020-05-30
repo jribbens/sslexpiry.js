@@ -11,10 +11,12 @@ SSL certificates, and checks the expiry dates etc. It will warn you if:
   * the server does not support SSL,
   * the certificate uses MD5 or SHA1,
   * the certificate has expired,
+  * any certificate in the chain has expired,
   * the certificate was issued on 1st March 2018 or later
     and is valid for over [825 days](https://cabforum.org/2017/03/17/ballot-193-825-day-certificate-lifetimes/),
   * the certificate was issued by Symantec, Thawte, RapidSSL or Geotrust
     and the [Chrome distrust date](https://security.googleblog.com/2017/09/chromes-plan-to-distrust-symantec.html) is soon,
+  * any certificate in the chain will expire soon,
   * or the certificate will expire soon.
 
 The intended use is that you will put the list of your servers using
@@ -25,7 +27,7 @@ you if your certificates will expire soon.
 Requirements
 ------------
 
-The script relies on Node.js 7 or above. You can install it with:
+The script relies on Node.js 8 or above. You can install it with:
 
     sudo npm install -g sslexpiry
 
@@ -34,8 +36,8 @@ Usage
 -----
 
 
-    usage: sslexpiry [-h] [-b FILENAME] [-d DAYS] [-f FILENAME] [-t SECONDS]
-                     [-v] [-V] [-z]
+    usage: sslexpiry [-h] [-b FILENAME] [-d DAYS] [-f FILENAME] [-i]
+                     [-t SECONDS] [-v] [-V] [-z]
                      [SERVER [SERVER ...]]
 
     SSL expiry checker
@@ -52,6 +54,7 @@ Usage
                             (default=30)
       -f FILENAME, --from-file FILENAME
                             Read the servers to check from the specified file.
+      -i, --ignore-chain    Don't check other certificates in the chain
       -t SECONDS, --timeout SECONDS
                             The number of seconds to allow for server response.
                             (default=30)
@@ -85,6 +88,10 @@ should contain one serial number per line. They can contain blank lines,
 and any characters from a '#' onwards are ignored, as are leading or trailing
 whitespace. The serial numbers can be in either upper or lower case.
 
+If the `-i` option is specified, only the first certificate in the chain
+will be checked, rather than also checking any intermediate certificates
+that are supplied by the server.
+
 The process exit code will be zero if no problems were found, and
 non-zero otherwise, unless the `--exit-zero` option was specified,
 in which case the exit code will be zero unless there was an
@@ -114,6 +121,11 @@ Example output
 
 History
 -------
+
+### 1.7.0 (2020-05-30)
+
+  * Check all certificates in the chain sent by the server
+  * Dependency updates mean node 8 is now required
 
 ### 1.6.0 (2020-03-04)
 
