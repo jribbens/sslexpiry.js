@@ -3,7 +3,7 @@
 /* global describe, it, beforeEach */
 
 const { expect, getNodeCert, makeCert } = require('./support/common')
-const { CertError, checkCert } = require('../check-cert')
+const { CertError, checkCert, compareResults } = require('../check-cert')
 
 describe('check-cert.js', function () {
   describe('CertError', function () {
@@ -24,13 +24,18 @@ describe('check-cert.js', function () {
 
   describe('checkCert', function () {
     var cert
+    var issuer
     var now
 
     beforeEach(function () {
+      issuer = undefined
       now = undefined
     })
 
-    function callCheckCert () { return checkCert(getNodeCert(cert), 30, now) }
+    function callCheckCert () {
+      return checkCert(
+        issuer ? getNodeCert(cert, issuer) : getNodeCert(cert), 30, now)
+    }
 
     it('should be a function', function () {
       expect(checkCert).to.be.a('function')
@@ -159,6 +164,49 @@ describe('check-cert.js', function () {
       expect(callCheckCert).to.throw(CertError, /too long/i)
         .to.include({severe: true})
         .with.property('endDate').sameMoment(cert.validity.notAfter)
+    })
+
+    it('should return the earliest expiry in the chain', function () {
+      cert = makeCert({ notAfter: 60 })
+      issuer = makeCert({ notAfter: 40 })
+      expect(callCheckCert()).to.be.an.instanceof(Date)
+        .sameMoment(issuer.validity.notAfter)
+      cert = makeCert({ notAfter: 40 })
+      issuer = makeCert({ notAfter: 60 })
+      expect(callCheckCert()).to.be.an.instanceof(Date)
+        .sameMoment(cert.validity.notAfter)
+    })
+
+    it('should reject the expired certificate in a chain #1', function () {
+      cert = makeCert({ notAfter: -1 })
+      issuer = makeCert()
+      expect(callCheckCert).to.throw(CertError, /expired/i)
+        .to.include({severe: true})
+        .with.property('endDate').sameMoment(cert.validity.notAfter)
+    })
+
+    it('should reject the expired certificate in a chain #2', function () {
+      cert = makeCert()
+      issuer = makeCert({ notAfter: -1 })
+      expect(callCheckCert).to.throw(CertError, /expired/i)
+        .to.include({severe: true})
+        .with.property('endDate').sameMoment(issuer.validity.notAfter)
+    })
+
+    it('should reject the oldest expired certificate #1', function () {
+      cert = makeCert({ notAfter: -2 })
+      issuer = makeCert({ notAfter: -1 })
+      expect(callCheckCert).to.throw(CertError, /expired/i)
+        .to.include({severe: true})
+        .with.property('endDate').sameMoment(cert.validity.notAfter)
+    })
+
+    it('should reject the oldest expired certificate #2', function () {
+      cert = makeCert({ notAfter: -1 })
+      issuer = makeCert({ notAfter: -2 })
+      expect(callCheckCert).to.throw(CertError, /expired/i)
+        .to.include({severe: true})
+        .with.property('endDate').sameMoment(issuer.validity.notAfter)
     })
   })
 })

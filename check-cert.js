@@ -31,54 +31,79 @@ const CertError = module.exports.CertError = class extends Error {
   }
 }
 
-/** Check a certificate to see if it has any problems, such as expiring
-  * soon or using a deprecated signature algorithm.
+/** Compare two checkCert results and indicate which of the two is
+  * more important/urgent.
   *
-  * @param {certificate} certificate - The certificate to check.
-  * @param {integer} days - The number of days to consider 'soon'.
-  * @param {Date} [now] - When to consider 'now' to be.
-  * @returns {Date} - the date the certificate will fail.
-  * @throws {CertError} There was a problem with a certificate.
+  * @param a - The first result.
+  * @param b - The second result.
+  * @returns {integer} - less than zero if 'a' is more important,
+  *                      greater than zero if 'b' is more important,
+  *                      zero if they are equally important.
   */
-module.exports.checkCert = (certificate, days, now) => {
+const compareResults = module.exports.compareResults = (a, b) => {
+  if (a instanceof Date) {
+    if (b instanceof Date) return a - b
+    return 1
+  }
+  if (b instanceof Date) return -1
+  if (a instanceof CertError && b instanceof CertError &&
+      a.severe !== b.severe) {
+    if (a.severe) return -1
+    return 1
+  }
+  if (a instanceof CertError && a.endDate) {
+    if (b instanceof CertError && b.endDate) {
+      if (a.endDate - b.endDate) return a.endDate - b.endDate
+      return 0
+    }
+    return 1
+  }
+  if (b instanceof CertError && b.endDate) return -1
+  return 0
+}
+
+const checkOneCert = (certificate, days, now, chain) => {
   const validFrom = new Date(certificate.valid_from)
   const validTo = new Date(certificate.valid_to)
   const lifetimeDays = Math.floor((validTo - validFrom) / 86400000)
   var endDate = validTo
   var endReason = 'expiry'
+  const pos = 'Certificate' + (chain ? ` ${chain + 1} in chain` : '')
   now = now || new Date()
 
   /* Check if the certificate has already expired. */
 
   if (validTo.getTime() <= now.getTime()) {
     throw new CertError(
-      `Certificate expired on ${strftime('%d %b %Y', validTo)}!`,
+      `${pos} expired on ${strftime('%d %b %Y', validTo)}!`,
       true, validTo)
   }
 
   /* Check if the certificate uses a deprecated algorithm.
      Requires converting the certificate to a node-forge one. */
 
-  const forgeCert = pki.certificateFromAsn1(
-    asn1.fromDer(new ByteBuffer(certificate.raw)))
-  const sigAlg = pki.oids[forgeCert.siginfo.algorithmOid]
-  if (!sigAlg) {
-    throw new CertError('Signature algorithm is unknown', false, validTo)
-  }
-  if (/md5|sha1(?!\d)/i.test(sigAlg)) {
-    throw new CertError(`Signature algorithm is ${sigAlg}`, true, validTo)
-  }
+  if (!chain) {
+    const forgeCert = pki.certificateFromAsn1(
+      asn1.fromDer(new ByteBuffer(certificate.raw)))
+    const sigAlg = pki.oids[forgeCert.siginfo.algorithmOid]
+    if (!sigAlg) {
+      throw new CertError('Signature algorithm is unknown', false, validTo)
+    }
+    if (/md5|sha1(?!\d)/i.test(sigAlg)) {
+      throw new CertError(`Signature algorithm is ${sigAlg}`, true, validTo)
+    }
 
-  /* Check if the certificate is issued by one of the Symantec CAs
-     that are going to be distrusted during 2018. */
+    /* Check if the certificate is issued by one of the Symantec CAs
+       that are going to be distrusted during 2018. */
 
-  if (/symantec|thawte|rapidssl|geotrust/i.test(certificate.issuer.CN)) {
-    const distrustDate = new Date(
-      validFrom.getTime() < new Date('2016-06-01').getTime()
-        ? '2018-03-15' : '2018-09-13')
-    if (distrustDate.getTime() < validTo.getTime()) {
-      endDate = distrustDate
-      endReason = 'distrust'
+    if (/symantec|thawte|rapidssl|geotrust/i.test(certificate.issuer.CN)) {
+      const distrustDate = new Date(
+        validFrom.getTime() < new Date('2016-06-01').getTime()
+          ? '2018-03-15' : '2018-09-13')
+      if (distrustDate.getTime() < validTo.getTime()) {
+        endDate = distrustDate
+        endReason = 'distrust'
+      }
     }
   }
 
@@ -86,7 +111,7 @@ module.exports.checkCert = (certificate, days, now) => {
 
   if (endDate.getTime() <= now.getTime()) {
     throw new CertError(
-      `Certificate became distrusted on ${strftime('%d %b %Y', endDate)}!`,
+      `${pos} became distrusted on ${strftime('%d %b %Y', endDate)}!`,
       true, endDate)
   }
 
@@ -96,13 +121,13 @@ module.exports.checkCert = (certificate, days, now) => {
 
   if (daysToLive < days) {
     throw new CertError(
-      `Certificate ${endReason} date is ${strftime('%d %b %Y', endDate)}` +
+      `${pos} ${endReason} date is ${strftime('%d %b %Y', endDate)}` +
       ` - ${daysToLive} day${daysToLive === 1 ? '' : 's'}`, false, endDate)
   }
 
   /* Check if the certificate has a too-long validity period. */
 
-  if (validFrom.getTime() >= new Date('2018-03-01').getTime() &&
+  if (!chain && validFrom.getTime() >= new Date('2018-03-01').getTime() &&
       lifetimeDays > 825) {
     throw new CertError(
       `Certificate lifetime of ${lifetimeDays} is too long`, true, endDate)
@@ -111,4 +136,32 @@ module.exports.checkCert = (certificate, days, now) => {
   /* No problems found - return the certificate failure date. */
 
   return endDate
+}
+
+/** Check a certificate chain to see if it has any problems, such as expiring
+  * soon or using a deprecated signature algorithm.
+  *
+  * @param {certificate} certificate - The certificate to check.
+  * @param {integer} days - The number of days to consider 'soon'.
+  * @param {Date} [now] - When to consider 'now' to be.
+  * @returns {Date} - the date the certificate will fail.
+  * @throws {CertError} There was a problem with a certificate.
+  */
+module.exports.checkCert = (certificate, days, now) => {
+  let chain = 0
+  let result
+  while (certificate) {
+    let certResult
+    try {
+      certResult = checkOneCert(certificate, days, now, chain)
+    } catch (e) {
+      certResult = e
+    }
+    if (!result || compareResults(certResult, result) < 0) result = certResult
+    certificate = (certificate.issuerCertificate !== certificate)
+      ? certificate.issuerCertificate : undefined
+    chain += 1
+  }
+  if (result instanceof Date) return result
+  throw result
 }

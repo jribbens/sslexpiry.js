@@ -9,7 +9,7 @@ const byline = require('byline')
 const chalk = require('chalk')
 const strftime = require('strftime')
 
-const { CertError } = require('./check-cert')
+const { CertError, compareResults } = require('./check-cert')
 const { version } = require('./package')
 
 const padEnd = (string, targetLength) => {
@@ -54,6 +54,10 @@ const sslexpiry = async (argv, {
     defaultValue: [],
     metavar: 'FILENAME',
     help: 'Read the servers to check from the specified file.'
+  })
+  parser.addArgument(['-i', '--ignore-chain'], {
+    action: 'storeTrue',
+    help: 'Don\'t check other certificates in the chain'
   })
   parser.addArgument(['-t', '--timeout'], {
     defaultValue: 30,
@@ -119,6 +123,7 @@ const sslexpiry = async (argv, {
         if (badSerials[certificate.serialNumber.toLowerCase()]) {
           throw new CertError(`Serial number is on the bad list`, true)
         } else {
+          if (args.ignore_chain) delete certificate.issuerCertificate
           results[server] = checkCert(certificate, args.days)
         }
         if (args.verbose) {
@@ -133,32 +138,8 @@ const sslexpiry = async (argv, {
   }
   await Promise.all(promises)
 
-  servers.sort((keyA, keyB) => {
-    const a = results[keyA]
-    const b = results[keyB]
-    if (a instanceof Date) {
-      if (b instanceof Date) {
-        if (a - b) return a - b
-        return keyA < keyB ? -1 : 1
-      }
-      return 1
-    }
-    if (b instanceof Date) return -1
-    if (a instanceof CertError && b instanceof CertError &&
-        a.severe !== b.severe) {
-      if (a.severe) return -1
-      return 1
-    }
-    if (a instanceof CertError && a.endDate) {
-      if (b instanceof CertError && b.endDate) {
-        if (a.endDate - b.endDate) return a.endDate - b.endDate
-        return keyA < keyB ? -1 : 1
-      }
-      return 1
-    }
-    if (b instanceof CertError && b.endDate) return -1
-    return keyA < keyB ? -1 : 1
-  })
+  servers.sort((keyA, keyB) =>
+    compareResults(results[keyA], results[keyB]) || (keyA < keyB ? -1 : 1))
 
   for (let server of servers) {
     let result = results[server]

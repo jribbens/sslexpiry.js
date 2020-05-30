@@ -35,17 +35,20 @@ module.exports.makeCert = (
   return cert
 }
 
-/* Convert a node-forge certificate into something that looks like
-   node's tls.tlsSocket.getPeerCertificate() output, or at least
+/* Convert one or more node-forge certificates into something that looks
+   like node's tls.tlsSocket.getPeerCertificate() output, or at least
    close enough for our purposes. */
 
-module.exports.getNodeCert = (nodeCert) => {
+const getNodeCert = module.exports.getNodeCert = (...certs) => {
+  if (!certs.length) return undefined
+  certs[0].issuer.getField('CN').value
   return {
-    issuer: { CN: nodeCert.issuer.getField('CN').value },
-    raw: asn1.toDer(pki.certificateToAsn1(nodeCert)),
-    subject: { CN: nodeCert.subject.getField('CN').value },
-    valid_from: nodeCert.validity.notBefore,
-    valid_to: nodeCert.validity.notAfter
+    issuer: { CN: certs[0].issuer.getField('CN').value },
+    issuerCertificate: getNodeCert(...certs.slice(1)),
+    raw: asn1.toDer(pki.certificateToAsn1(certs[0])),
+    subject: { CN: certs[0].subject.getField('CN').value },
+    valid_from: certs[0].validity.notBefore,
+    valid_to: certs[0].validity.notAfter
   }
 }
 

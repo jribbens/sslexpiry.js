@@ -58,7 +58,7 @@ module.exports.connect = (servername, port, protocol, timeout, ca) => {
           if (!tlsSocket.authorized) {
             reject(new Error(tlsSocket.authorizationError))
           } else {
-            var certificate = tlsSocket.getPeerCertificate()
+            var certificate = tlsSocket.getPeerCertificate(true)
             resolve(certificate)
           }
           socket.destroy()
