@@ -15,6 +15,7 @@ const { expect } = require('./support/common')
 const DAYS = 86400 * 1000
 
 describe('cli.js', function () {
+  let chalkLevel
   const connects = []
   const now = new Date()
   const date = new Date(+now + 60 * DAYS)
@@ -58,11 +59,12 @@ describe('cli.js', function () {
   }
 
   beforeEach(function () {
-    chalk.enabled = false
+    chalkLevel = chalk.level
+    chalk.level = 0
   })
 
   afterEach(function () {
-    chalk.enabled = true
+    chalk.level = chalkLevel
   })
 
   it('should do nothing with no arguments', async function () {
