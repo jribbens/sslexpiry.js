@@ -13,9 +13,12 @@ const keys = pki.rsa.generateKeyPair(1024)
 
 /* Generate a self-signed node-forge certificate with the desired settings. */
 
-module.exports.makeCert = (
-    { notAfter = 60, notBefore = -60,
-      commonName = 'localhost', signature = 'sha256' } = {}) => {
+module.exports.makeCert = ({
+  notAfter = 60,
+  notBefore = -60,
+  commonName = 'localhost',
+  signature = 'sha256'
+} = {}) => {
   const now = new Date()
   const cert = pki.createCertificate()
 
@@ -41,7 +44,6 @@ module.exports.makeCert = (
 
 const getNodeCert = module.exports.getNodeCert = (...certs) => {
   if (!certs.length) return undefined
-  certs[0].issuer.getField('CN').value
   return {
     issuer: { CN: certs[0].issuer.getField('CN').value },
     issuerCertificate: getNodeCert(...certs.slice(1)),

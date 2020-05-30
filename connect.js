@@ -54,7 +54,7 @@ module.exports.connect = (servername, port, protocol, timeout, ca) => {
           socket.destroy()
           return
         }
-        var tlsSocket = tls.connect({ca, servername, socket}, () => {
+        var tlsSocket = tls.connect({ ca, servername, socket }, () => {
           if (!tlsSocket.authorized) {
             reject(new Error(tlsSocket.authorizationError))
           } else {

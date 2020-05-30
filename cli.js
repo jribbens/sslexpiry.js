@@ -17,8 +17,8 @@ const padEnd = (string, targetLength) => {
   return string
 }
 
-const sslexpiry = async (argv, {
-  debug = false, checkCert, connect, output = console.log } = {}) => {
+const sslexpiry = async (argv,
+  { debug = false, checkCert, connect, output = console.log } = {}) => {
   checkCert = checkCert || require('./check-cert').checkCert
   connect = connect || require('./connect').connect
 
@@ -86,7 +86,7 @@ const sslexpiry = async (argv, {
   const results = {}
   const serials = {}
 
-  for (let filename of args.from_file) {
+  for (const filename of args.from_file) {
     const serverFile = fs.createReadStream(filename, 'utf8')
     const lineStream = createReader(byline(serverFile))
     let line
@@ -97,7 +97,7 @@ const sslexpiry = async (argv, {
     } while (line !== null)
   }
 
-  for (let filename of args.bad_serials) {
+  for (const filename of args.bad_serials) {
     const serialFile = fs.createReadStream(filename, 'utf8')
     const lineStream = createReader(byline(serialFile))
     let line
@@ -110,10 +110,10 @@ const sslexpiry = async (argv, {
 
   const promises = []
   let longest = 1
-  for (let server of servers) {
+  for (const server of servers) {
     let servername, protocol, port
-    ;[ servername, protocol ] = server.split('/', 2)
-    ;[ servername, port ] = servername.split(':', 2)
+    ;[servername, protocol] = server.split('/', 2)
+    ;[servername, port] = servername.split(':', 2)
     if (servername.charAt(0) === '!') servername = servername.substr(1)
     promises.push((async () => {
       try {
@@ -121,7 +121,7 @@ const sslexpiry = async (argv, {
           servername, port, protocol, args.timeout * 1000)
         serials[server] = certificate.serialNumber
         if (badSerials[certificate.serialNumber.toLowerCase()]) {
-          throw new CertError(`Serial number is on the bad list`, true)
+          throw new CertError('Serial number is on the bad list', true)
         } else {
           if (args.ignore_chain) delete certificate.issuerCertificate
           results[server] = checkCert(certificate, args.days)
@@ -141,9 +141,10 @@ const sslexpiry = async (argv, {
   servers.sort((keyA, keyB) =>
     compareResults(results[keyA], results[keyB]) || (keyA < keyB ? -1 : 1))
 
-  for (let server of servers) {
-    let result = results[server]
-    let serial = (args.verbose > 1) ? (' ' + padEnd(serials[server], 36)) : ''
+  for (const server of servers) {
+    const result = results[server]
+    const serial = (args.verbose > 1)
+      ? (' ' + padEnd(serials[server], 36)) : ''
     if (result instanceof Date) {
       if (args.verbose) {
         output(padEnd(server, longest) + serial + ' ' +

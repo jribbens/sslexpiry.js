@@ -26,10 +26,10 @@ describe('cli.js', function () {
 
   function checkCert (certificate, days) {
     const response = {
-      'badsig': new CertError('badsig', true, date),
-      'error': new Error('error'),
-      'expired': new CertError('expired', true, new Date(+now - 7 * DAYS)),
-      'expiring': new CertError('expiring', false, new Date(+now + 7 * DAYS))
+      badsig: new CertError('badsig', true, date),
+      error: new Error('error'),
+      expired: new CertError('expired', true, new Date(+now - 7 * DAYS)),
+      expiring: new CertError('expiring', false, new Date(+now + 7 * DAYS))
     }[certificate._name.split(',', 1)[0]] || date
     checkDays = days
     if (response instanceof Error) throw response
