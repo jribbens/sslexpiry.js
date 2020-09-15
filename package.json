@@ -30,7 +30,7 @@
     "awaitify-stream": "^1.0.2",
     "byline": "^5.0.0",
     "chalk": "^3.0.0",
-    "node-forge": "^0.9.1",
+    "node-forge": "^0.10.0",
     "strftime": "^0.10.0"
   },
   "devDependencies": {
