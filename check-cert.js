@@ -92,19 +92,6 @@ const checkOneCert = (certificate, days, now, chain) => {
     if (/md5|sha1(?!\d)/i.test(sigAlg)) {
       throw new CertError(`Signature algorithm is ${sigAlg}`, true, validTo)
     }
-
-    /* Check if the certificate is issued by one of the Symantec CAs
-       that are going to be distrusted during 2018. */
-
-    if (/symantec|thawte|rapidssl|geotrust/i.test(certificate.issuer.CN)) {
-      const distrustDate = new Date(
-        validFrom.getTime() < new Date('2016-06-01').getTime()
-          ? '2018-03-15' : '2018-09-13')
-      if (distrustDate.getTime() < validTo.getTime()) {
-        endDate = distrustDate
-        endReason = 'distrust'
-      }
-    }
   }
 
   /* Check if the certificate has already become distrusted. */

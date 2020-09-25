@@ -14,8 +14,6 @@ SSL certificates, and checks the expiry dates etc. It will warn you if:
   * any certificate in the chain has expired,
   * the certificate was issued on 1st March 2018 or later
     and is valid for over [825 days](https://cabforum.org/2017/03/17/ballot-193-825-day-certificate-lifetimes/),
-  * the certificate was issued by Symantec, Thawte, RapidSSL or Geotrust
-    and the [Chrome distrust date](https://security.googleblog.com/2017/09/chromes-plan-to-distrust-symantec.html) is soon,
   * any certificate in the chain will expire soon,
   * or the certificate will expire soon.
 
@@ -121,6 +119,10 @@ Example output
 
 History
 -------
+
+### 1.8.0 (2020-09-25)
+
+  * Remove Symantec distrust check that is now obsolete
 
 ### 1.7.0 (2020-05-30)
 
