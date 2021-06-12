@@ -26,17 +26,17 @@
     "node": ">=10"
   },
   "dependencies": {
-    "argparse": "^1.0.10",
+    "argparse": "^2.0.1",
     "awaitify-stream": "^1.0.2",
     "byline": "^5.0.0",
-    "chalk": "^3.0.0",
+    "chalk": "4.1.0",
     "node-forge": "^0.10.0",
     "strftime": "^0.10.0"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
+    "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "chai-moment": "^0.1.0",
-    "mocha": "^7.2.0"
+    "mocha": "^9.0.0"
   }
 }

@@ -3,7 +3,7 @@
 
 const fs = require('fs')
 
-const { ArgumentParser, Const: { SUPPRESS } } = require('argparse')
+const { ArgumentParser, SUPPRESS } = require('argparse')
 const { createReader } = require('awaitify-stream')
 const byline = require('byline')
 const chalk = require('chalk')
@@ -23,64 +23,63 @@ const sslexpiry = async (argv,
   connect = connect || require('./connect').connect
 
   const parser = new ArgumentParser({
-    debug,
     description: 'SSL expiry checker',
     prog: 'sslexpiry'
   })
   if (debug) {
-    parser.exit = function (status, message) { this._printMessage(message) }
+    parser.exit = (status, message) => message && this._print_message(message)
     if (output) {
-      parser._printMessage = (message) => { message && output('' + message) }
+      parser._print_message = (message) => message && output('' + message)
     }
   }
-  parser.addArgument('servers', {
+  parser.add_argument('servers', {
     metavar: 'SERVER',
     nargs: '*',
     help: 'Check the specified server.'
   })
-  parser.addArgument(['-b', '--bad-serials'], {
+  parser.add_argument('-b', '--bad-serials', {
     action: 'append',
-    defaultValue: [],
+    default: [],
     metavar: 'FILENAME',
     help: 'Check the certificate serial numbers against the specified file.'
   })
-  parser.addArgument(['-d', '--days'], {
-    defaultValue: 30,
+  parser.add_argument('-d', '--days', {
+    default: 30,
     type: 'int',
     help: 'The number of days at which to warn of expiry. (default=30)'
   })
-  parser.addArgument(['-f', '--from-file'], {
+  parser.add_argument('-f', '--from-file', {
     action: 'append',
-    defaultValue: [],
+    default: [],
     metavar: 'FILENAME',
     help: 'Read the servers to check from the specified file.'
   })
-  parser.addArgument(['-i', '--ignore-chain'], {
-    action: 'storeTrue',
-    help: 'Don\'t check other certificates in the chain'
+  parser.add_argument('-i', '--ignore-chain', {
+    action: 'store_true',
+    help: "Don't check other certificates in the chain"
   })
-  parser.addArgument(['-t', '--timeout'], {
-    defaultValue: 30,
+  parser.add_argument('-t', '--timeout', {
+    default: 30,
     type: 'int',
     metavar: 'SECONDS',
     help: 'The number of seconds to allow for server response. (default=30)'
   })
-  parser.addArgument(['-v', '--verbose'], {
+  parser.add_argument('-v', '--verbose', {
     action: 'count',
     help: 'Display verbose output.'
   })
-  parser.addArgument(['-V', '--version'], {
+  parser.add_argument('-V', '--version', {
     action: 'version',
     version,
-    defaultValue: SUPPRESS,
-    help: 'Show program\'s version number and exit.'
+    default: SUPPRESS,
+    help: "Show program's version number and exit."
   })
-  parser.addArgument(['-z', '--exit-zero'], {
-    action: 'storeTrue',
+  parser.add_argument('-z', '--exit-zero', {
+    action: 'store_true',
     help: 'Always return a process exit code of zero.'
   })
 
-  const args = parser.parseArgs(argv)
+  const args = parser.parse_args(argv)
   const servers = args.servers.slice()
   const badSerials = {}
   const results = {}
