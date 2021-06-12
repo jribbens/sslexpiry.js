@@ -120,6 +120,10 @@ Example output
 History
 -------
 
+### 1.9.0 (2021-06-12)
+
+  * Dependency updates mean node 10 is now required
+
 ### 1.8.0 (2020-09-25)
 
   * Remove Symantec distrust check that is now obsolete
