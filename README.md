@@ -120,6 +120,10 @@ Example output
 History
 -------
 
+### 1.10.0 (2021-09-30)
+
+  * Work-around for expiry of LetsEncrypt root certificate
+
 ### 1.9.0 (2021-06-12)
 
   * Dependency updates mean node 10 is now required
