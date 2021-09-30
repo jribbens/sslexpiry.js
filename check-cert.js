@@ -137,14 +137,28 @@ const checkOneCert = (certificate, days, now, chain) => {
 module.exports.checkCert = (certificate, days, now) => {
   let chain = 0
   let result
+  let seenRootX1
   while (certificate) {
-    let certResult
-    try {
-      certResult = checkOneCert(certificate, days, now, chain)
-    } catch (e) {
-      certResult = e
+    /* We ignore the "DST Root CA X3" certificate if we have seen the
+     * "ISRG Root X1" certificate, since LetsEncrypt are doing hacky
+     * things which mean they're still using the former even though
+     * it's expired.
+     */
+    if (certificate.serialNumber === '4001772137D4E942B8EE76AA3C640AB7') {
+      seenRootX1 = true
     }
-    if (!result || compareResults(certResult, result) < 0) result = certResult
+    if (!seenRootX1 || certificate.serialNumber !==
+        '44AFB080D6A327BA893039862EF8406B') {
+      let certResult
+      try {
+        certResult = checkOneCert(certificate, days, now, chain)
+      } catch (e) {
+        certResult = e
+      }
+      if (!result || compareResults(certResult, result) < 0) {
+        result = certResult
+      }
+    }
     certificate = (certificate.issuerCertificate !== certificate)
       ? certificate.issuerCertificate : undefined
     chain += 1
