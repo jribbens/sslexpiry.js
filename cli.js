@@ -142,8 +142,7 @@ const sslexpiry = async (argv,
 
   for (const server of servers) {
     const result = results[server]
-    const serial = (args.verbose > 1)
-      ? (' ' + padEnd(serials[server], 36)) : ''
+    const serial = (args.verbose > 1) ? (' ' + padEnd(serials[server], 36)) : ''
     if (result instanceof Date) {
       if (args.verbose) {
         output(padEnd(server, longest) + serial + ' ' +

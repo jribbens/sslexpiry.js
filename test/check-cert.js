@@ -23,9 +23,9 @@ describe('check-cert.js', function () {
   })
 
   describe('checkCert', function () {
-    var cert
-    var issuer
-    var now
+    let cert
+    let issuer
+    let now
 
     beforeEach(function () {
       issuer = undefined

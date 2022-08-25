@@ -25,9 +25,11 @@ module.exports.makeCert = ({
   cert.publicKey = keys.publicKey
   cert.serialNumber = '01'
   cert.validity.notBefore = (typeof notBefore === 'number')
-    ? new Date(+now + notBefore * DAYS) : notBefore
+    ? new Date(+now + notBefore * DAYS)
+    : notBefore
   cert.validity.notAfter = (typeof notAfter === 'number')
-    ? new Date(+now + notAfter * DAYS) : notAfter
+    ? new Date(+now + notAfter * DAYS)
+    : notAfter
   const attrs = [
     { name: 'commonName', value: commonName },
     { name: 'organizationName', value: 'Test' }

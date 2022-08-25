@@ -76,8 +76,9 @@ describe('connect.js', function () {
         })
       })
       server.listen()
+      let connectCert
       try {
-        var connectCert = await connect(
+        connectCert = await connect(
           'localhost', server.address().port, protocol || 'none',
           1000, pemCert)
       } finally {

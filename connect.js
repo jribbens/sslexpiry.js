@@ -44,7 +44,7 @@ module.exports.connect = (servername, port, protocol, timeout, ca) => {
   if (!portInfo) throw new Error(`Unknown port ${port}`)
   if (!protocol && portInfo.protocol) protocol = portInfo.protocol
   return new Promise((resolve, reject) => {
-    var socket
+    let socket
     try {
       socket = net.createConnection(portInfo.port, servername, async () => {
         try {
@@ -54,11 +54,11 @@ module.exports.connect = (servername, port, protocol, timeout, ca) => {
           socket.destroy()
           return
         }
-        var tlsSocket = tls.connect({ ca, servername, socket }, () => {
+        const tlsSocket = tls.connect({ ca, servername, socket }, () => {
           if (!tlsSocket.authorized) {
             reject(new Error(tlsSocket.authorizationError))
           } else {
-            var certificate = tlsSocket.getPeerCertificate(true)
+            const certificate = tlsSocket.getPeerCertificate(true)
             resolve(certificate)
           }
           socket.destroy()

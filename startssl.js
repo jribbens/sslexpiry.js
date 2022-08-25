@@ -14,8 +14,8 @@ const none = (readSocket, writeSocket) => {}
 /* STARTSSL SMTP procedure */
 
 const smtp = async (readSocket, writeSocket) => {
-  var found
-  var line
+  let found
+  let line
 
   line = await readSocket.readAsync()
   if (!line.startsWith('220 ')) {
@@ -44,7 +44,7 @@ const smtp = async (readSocket, writeSocket) => {
 /* STARTSSL IMAP procedure */
 
 const imap = async (readSocket, writeSocket) => {
-  var line
+  let line
 
   line = await readSocket.readAsync()
   if (!line.startsWith('* OK')) {

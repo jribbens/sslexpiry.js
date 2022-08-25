@@ -37,6 +37,7 @@
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "chai-moment": "^0.1.0",
-    "mocha": "^10.0.0"
+    "mocha": "^10.0.0",
+    "standard": "^17.0.0"
   }
 }

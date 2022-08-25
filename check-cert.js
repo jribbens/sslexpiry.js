@@ -66,8 +66,7 @@ const checkOneCert = (certificate, days, now, chain) => {
   const validFrom = new Date(certificate.valid_from)
   const validTo = new Date(certificate.valid_to)
   const lifetimeDays = Math.floor((validTo - validFrom) / 86400000)
-  var endDate = validTo
-  var endReason = 'expiry'
+  const endDate = validTo
   const pos = 'Certificate' + (chain ? ` ${chain + 1} in chain` : '')
   now = now || new Date()
 
@@ -108,7 +107,7 @@ const checkOneCert = (certificate, days, now, chain) => {
 
   if (daysToLive < days) {
     throw new CertError(
-      `${pos} ${endReason} date is ${strftime('%d %b %Y', endDate)}` +
+      `${pos} expiry date is ${strftime('%d %b %Y', endDate)}` +
       ` - ${daysToLive} day${daysToLive === 1 ? '' : 's'}`, false, endDate)
   }
 
@@ -160,7 +159,8 @@ module.exports.checkCert = (certificate, days, now) => {
       }
     }
     certificate = (certificate.issuerCertificate !== certificate)
-      ? certificate.issuerCertificate : undefined
+      ? certificate.issuerCertificate
+      : undefined
     chain += 1
   }
   if (result instanceof Date) return result
