@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/jribbens/sslexpiry.js#readme",
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "dependencies": {
     "argparse": "^2.0.1",
