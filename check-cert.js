@@ -82,14 +82,22 @@ const checkOneCert = (certificate, days, now, chain) => {
      Requires converting the certificate to a node-forge one. */
 
   if (!chain) {
-    const forgeCert = pki.certificateFromAsn1(
-      asn1.fromDer(new ByteBuffer(certificate.raw)))
-    const sigAlg = pki.oids[forgeCert.siginfo.algorithmOid]
-    if (!sigAlg) {
-      throw new CertError('Signature algorithm is unknown', false, validTo)
-    }
-    if (/md5|sha1(?!\d)/i.test(sigAlg)) {
-      throw new CertError(`Signature algorithm is ${sigAlg}`, true, validTo)
+    try {
+      const forgeCert = pki.certificateFromAsn1(
+        asn1.fromDer(new ByteBuffer(certificate.raw)))
+      const sigAlg = pki.oids[forgeCert.siginfo.algorithmOid]
+      if (!sigAlg) {
+        throw new CertError('Signature algorithm is unknown', false, validTo)
+      }
+      if (/md5|sha1(?!\d)/i.test(sigAlg)) {
+        throw new CertError(`Signature algorithm is ${sigAlg}`, true, validTo)
+      }
+    } catch (err) {
+      if (err.message === 'Cannot read public key. OID is not RSA.') {
+        // Probably an ECDSA key, which node-forge does not support - proceed
+      } else {
+        throw err
+      }
     }
   }
 
