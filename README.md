@@ -120,6 +120,11 @@ Example output
 History
 -------
 
+### 1.11.0 (2022-08-25)
+
+  * Work-around for node-forge not supporting ECDSA
+  * Dependency updates mean node 12 is now required
+
 ### 1.10.0 (2021-09-30)
 
   * Work-around for expiry of LetsEncrypt root certificate
