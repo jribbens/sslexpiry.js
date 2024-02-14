@@ -110,14 +110,24 @@ const sslexpiry = async (argv,
   const promises = []
   let longest = 1
   for (const server of servers) {
-    let servername, protocol, port
+    let servername, protocol, port, ipoverride
     ;[servername, protocol] = server.split('/', 2)
-    ;[servername, port] = servername.split(':', 2)
+    ;[servername, ipoverride] = servername.split('@', 2)
+    if (ipoverride) {
+      const match = /^\[([0-9a-f:]+)\](?::(.*))?$/i.exec(ipoverride)
+      if (match) {
+        ;[, ipoverride, port] = match
+      } else {
+        ;[ipoverride, port] = ipoverride.split(':', 2)
+      }
+    } else {
+      ;[servername, port] = servername.split(':', 2)
+    }
     if (servername.charAt(0) === '!') servername = servername.substr(1)
     promises.push((async () => {
       try {
         const certificate = await connect(
-          servername, port, protocol, args.timeout * 1000)
+          servername, port, protocol, ipoverride, args.timeout * 1000)
         serials[server] = certificate.serialNumber
         if (badSerials[certificate.serialNumber.toLowerCase()]) {
           throw new CertError('Serial number is on the bad list', true)

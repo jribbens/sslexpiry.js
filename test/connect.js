@@ -57,8 +57,10 @@ describe('connect.js', function () {
 
     const cert = makeCert()
     const pemCert = getPEMCert(cert)
+    const cert2 = makeCert({ commonName: 'test.invalid' })
+    const pemCert2 = getPEMCert(cert2)
 
-    async function testConnect (protocol, startssl) {
+    async function testConnect (protocol, startssl, ipoverride) {
       const server = net.createServer(async function (socket) {
         socket.setTimeout(3 * 1000, () => { socket.destroy() })
         if (startssl) {
@@ -68,7 +70,7 @@ describe('connect.js', function () {
           await startssl(readSocket, writeSocket)
         }
         new tls.TLSSocket(socket, { // eslint-disable-line no-new
-          cert: pemCert,
+          cert: ipoverride ? pemCert2 : pemCert,
           handshakeTimeout: 2 * 1000,
           isServer: true,
           key: getPEMKey(),
@@ -79,8 +81,13 @@ describe('connect.js', function () {
       let connectCert
       try {
         connectCert = await connect(
-          'localhost', server.address().port, protocol || 'none',
-          1000, pemCert)
+          ipoverride ? 'test.invalid' : 'localhost',
+          server.address().port,
+          protocol || 'none',
+          ipoverride,
+          1000,
+          ipoverride ? pemCert2 : pemCert
+        )
       } finally {
         server.close()
       }
@@ -89,6 +96,14 @@ describe('connect.js', function () {
 
     it('should connect to a socket and talk SSL', function () {
       return testConnect()
+    })
+
+    it('should allow IPv4 address override', function () {
+      return testConnect(undefined, undefined, '127.0.0.1')
+    })
+
+    it('should allow IPv6 address override', function () {
+      return testConnect(undefined, undefined, '::1')
     })
 
     it('should notice a timeout', function () {

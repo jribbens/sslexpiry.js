@@ -37,8 +37,8 @@ describe('cli.js', function () {
     return response
   }
 
-  function connect (servername, port, protocol, timeout) {
-    const name = '' + servername + ',' + port + ',' + protocol + ',' + timeout
+  function connect (servername, port, protocol, ipoverride, timeout) {
+    const name = `${servername},${port},${protocol},${ipoverride},${timeout}`
     connects.push(name)
     return { _name: name, serialNumber: '01deadBEEF01' }
   }
@@ -118,8 +118,8 @@ describe('cli.js', function () {
   it('should process server arguments', async function () {
     await sslexpiry('server1', 'server2')
     expect(connects).to.deep.equal([
-      'server1,undefined,undefined,30000',
-      'server2,undefined,undefined,30000'
+      'server1,undefined,undefined,undefined,30000',
+      'server2,undefined,undefined,undefined,30000'
     ])
     expect(result).to.equal('')
   })
@@ -127,28 +127,70 @@ describe('cli.js', function () {
   it('should understand server:port', async function () {
     await sslexpiry('server1:port')
     expect(connects).to.deep.equal([
-      'server1,port,undefined,30000'
+      'server1,port,undefined,undefined,30000'
     ])
   })
 
   it('should understand server/protocol', async function () {
     await sslexpiry('server1/protocol')
     expect(connects).to.deep.equal([
-      'server1,undefined,protocol,30000'
+      'server1,undefined,protocol,undefined,30000'
     ])
   })
 
   it('should understand server:port/protocol', async function () {
     await sslexpiry('server1:port/protocol')
     expect(connects).to.deep.equal([
-      'server1,port,protocol,30000'
+      'server1,port,protocol,undefined,30000'
+    ])
+  })
+
+  it('should understand server@ipv4', async function () {
+    await sslexpiry('server1@192.168.0.1')
+    expect(connects).to.deep.equal([
+      'server1,undefined,undefined,192.168.0.1,30000'
+    ])
+  })
+
+  it('should understand server@ipv6', async function () {
+    await sslexpiry('server1@[0:0:0:0:0:0:0:1]')
+    expect(connects).to.deep.equal([
+      'server1,undefined,undefined,0:0:0:0:0:0:0:1,30000'
+    ])
+  })
+
+  it('should understand server@ipv4:port', async function () {
+    await sslexpiry('server1@192.168.0.1:port')
+    expect(connects).to.deep.equal([
+      'server1,port,undefined,192.168.0.1,30000'
+    ])
+  })
+
+  it('should understand server@ipv6:port', async function () {
+    await sslexpiry('server1@[0:0:0:0:0:0:0:1]:port')
+    expect(connects).to.deep.equal([
+      'server1,port,undefined,0:0:0:0:0:0:0:1,30000'
+    ])
+  })
+
+  it('should understand server@ipv4:port/protocol', async function () {
+    await sslexpiry('server1@192.168.0.1:port/protocol')
+    expect(connects).to.deep.equal([
+      'server1,port,protocol,192.168.0.1,30000'
+    ])
+  })
+
+  it('should understand server@ipv6:port/protocol', async function () {
+    await sslexpiry('server1@[0:0:0:0:0:0:0:1]:port/protocol')
+    expect(connects).to.deep.equal([
+      'server1,port,protocol,0:0:0:0:0:0:0:1,30000'
     ])
   })
 
   it('should ignore \'!\' prefixed to server name', async function () {
     await sslexpiry('!server1')
     expect(connects).to.deep.equal([
-      'server1,undefined,undefined,30000'
+      'server1,undefined,undefined,undefined,30000'
     ])
   })
 
@@ -178,8 +220,8 @@ describe('cli.js', function () {
   it('should output dates with -v', async function () {
     await sslexpiry('-v', 'server1', 'server2')
     expect(connects).to.deep.equal([
-      'server1,undefined,undefined,30000',
-      'server2,undefined,undefined,30000'
+      'server1,undefined,undefined,undefined,30000',
+      'server2,undefined,undefined,undefined,30000'
     ])
     expect(result).to.equal(`server1 ${sDate}\nserver2 ${sDate}\n`)
   })
@@ -234,11 +276,11 @@ describe('cli.js', function () {
   it('should read from config files', async function () {
     await sslexpiry('-f', path.join(__dirname, 'config.txt'), 'error')
     expect(connects).to.deep.equal([
-      'error,undefined,undefined,30000',
-      'server1,undefined,undefined,30000',
-      'server2,port,undefined,30000',
-      'server1,undefined,protocol,30000',
-      'server1,port,protocol,30000'
+      'error,undefined,undefined,undefined,30000',
+      'server1,undefined,undefined,undefined,30000',
+      'server2,port,undefined,undefined,30000',
+      'server1,undefined,protocol,undefined,30000',
+      'server1,port,protocol,undefined,30000'
     ])
   })
 
@@ -247,15 +289,15 @@ describe('cli.js', function () {
       '-f', path.join(__dirname, 'config.txt'),
       '--from-file', path.join(__dirname, 'config.txt'), 'error')
     expect(connects).to.deep.equal([
-      'error,undefined,undefined,30000',
-      'server1,undefined,undefined,30000',
-      'server2,port,undefined,30000',
-      'server1,undefined,protocol,30000',
-      'server1,port,protocol,30000',
-      'server1,undefined,undefined,30000',
-      'server2,port,undefined,30000',
-      'server1,undefined,protocol,30000',
-      'server1,port,protocol,30000'
+      'error,undefined,undefined,undefined,30000',
+      'server1,undefined,undefined,undefined,30000',
+      'server2,port,undefined,undefined,30000',
+      'server1,undefined,protocol,undefined,30000',
+      'server1,port,protocol,undefined,30000',
+      'server1,undefined,undefined,undefined,30000',
+      'server2,port,undefined,undefined,30000',
+      'server1,undefined,protocol,undefined,30000',
+      'server1,port,protocol,undefined,30000'
     ])
   })
 

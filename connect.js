@@ -34,53 +34,60 @@ const getPort = (port) => {
   * @param {(string|integer)} [port=443] - The TCP port to connect to.
   * @param {string} [protocol] - The STARTTLS protocol to use. Defaults to
   *   'none', except if <port> is 'smtp', 'submission' or 'imap'.
+  * @param {string} [ipoverride] - The IP address to connect to, overriding
+  *   the DNS address of the servername
   * @param {integer} [timeout] - The number of milliseconds to wait.
   * @param {object} [ca] - secureContext 'ca' parameter.
   * @returns {certificate} The server's certificate.
   */
 
-module.exports.connect = (servername, port, protocol, timeout, ca) => {
-  const portInfo = getPort(port)
-  if (!portInfo) throw new Error(`Unknown port ${port}`)
-  if (!protocol && portInfo.protocol) protocol = portInfo.protocol
-  return new Promise((resolve, reject) => {
-    let socket
-    try {
-      socket = net.createConnection(portInfo.port, servername, async () => {
-        try {
-          await startssl(socket, protocol)
-        } catch (e) {
-          reject(e)
-          socket.destroy()
-          return
-        }
-        const tlsSocket = tls.connect({ ca, servername, socket }, () => {
-          if (!tlsSocket.authorized) {
-            reject(new Error(tlsSocket.authorizationError))
-          } else {
-            const certificate = tlsSocket.getPeerCertificate(true)
-            resolve(certificate)
+module.exports.connect =
+  (servername, port, protocol, ipoverride, timeout, ca) => {
+    const portInfo = getPort(port)
+    if (!portInfo) throw new Error(`Unknown port ${port}`)
+    if (!protocol && portInfo.protocol) protocol = portInfo.protocol
+    return new Promise((resolve, reject) => {
+      let socket
+      try {
+        socket = net.createConnection(
+          portInfo.port,
+          ipoverride || servername,
+          async () => {
+            try {
+              await startssl(socket, protocol)
+            } catch (e) {
+              reject(e)
+              socket.destroy()
+              return
+            }
+            const tlsSocket = tls.connect({ ca, servername, socket }, () => {
+              if (!tlsSocket.authorized) {
+                reject(new Error(tlsSocket.authorizationError))
+              } else {
+                const certificate = tlsSocket.getPeerCertificate(true)
+                resolve(certificate)
+              }
+              socket.destroy()
+            })
+            tlsSocket.on('error', (e) => {
+              reject(e)
+              socket.destroy()
+            })
           }
-          socket.destroy()
-        })
-        tlsSocket.on('error', (e) => {
+        )
+        if (timeout) {
+          socket.setTimeout(timeout, () => {
+            reject(new Error('Timeout connecting to server'))
+            socket.destroy()
+          })
+        }
+        socket.on('error', (e) => {
           reject(e)
           socket.destroy()
         })
-      })
-      if (timeout) {
-        socket.setTimeout(timeout, () => {
-          reject(new Error('Timeout connecting to server'))
-          socket.destroy()
-        })
-      }
-      socket.on('error', (e) => {
+      } catch (e) {
         reject(e)
-        socket.destroy()
-      })
-    } catch (e) {
-      reject(e)
-      if (socket) socket.destroy()
-    }
-  })
-}
+        if (socket) socket.destroy()
+      }
+    })
+  }
