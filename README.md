@@ -66,7 +66,12 @@ characters from a '#' onwards are ignored as comments.
 
 Servers specified in the files or on the command line are of the form:
 
-    hostname[:port][/protocol]
+    hostname[@ip-address][:port][/protocol]
+
+`ip-address` can be an IPv4 address (e.g. `127.0.0.1`) or an IPv6 address
+surrounded by square brackets (eg. `[::1]`). If it is specified then it
+will be used as the IP address to connect to, instead of looking up the
+hostname in the DNS.
 
 `port` can be a number or a standard service name (e.g. 'https'). If it
 is omitted then 'https' is assumed.
@@ -119,6 +124,10 @@ Example output
 
 History
 -------
+
+### 1.12.0 (2024-02-14)
+
+  * Add a way to override the DNS and specify an IP address instead
 
 ### 1.11.0 (2022-08-25)
 
