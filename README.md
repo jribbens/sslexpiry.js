@@ -25,7 +25,7 @@ you if your certificates will expire soon.
 Requirements
 ------------
 
-The script relies on Node.js 10 or above. You can install it with:
+The script relies on Node.js 12 or above. You can install it with:
 
     sudo npm install -g sslexpiry
 
